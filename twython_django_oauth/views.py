@@ -1,14 +1,11 @@
 from django.contrib.auth import authenticate, login, logout as django_logout
-from django.contrib.auth import get_user_model
+from django.contrib.auth.models import User
 from django.http import HttpResponseRedirect
 from django.shortcuts import render_to_response
 from django.conf import settings
 from django.core.urlresolvers import reverse
 
 from twython import Twython
-
-User = get_user_model()
-
 
 # If you've got your own Profile setup, see the note in the models file
 # about adapting this to your own setup.
@@ -38,9 +35,6 @@ def begin_auth(request):
 
     # Then send them over there, durh.
     request.session['request_token'] = auth_props
-
-    request.session['next_url'] = request.GET.get('next',None)
-    
     return HttpResponseRedirect(auth_props['auth_url'])
 
 
@@ -78,10 +72,7 @@ def thanks(request, redirect_url=settings.LOGIN_REDIRECT_URL):
         password=authorized_tokens['oauth_token_secret']
     )
     login(request, user)
-    redirect_url = request.session.get('next_url', redirect_url)
-
-    HttpResponseRedirect(redirect_url)
-
+    return HttpResponseRedirect(redirect_url)
 
 
 def user_timeline(request):
